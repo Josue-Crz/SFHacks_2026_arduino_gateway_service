@@ -6,12 +6,7 @@ load_dotenv()
 
 def get_db_connection():
     """Return a psycopg2 connection using SUPABASE_DB_URL from .env"""
-    db_url = os.getenv('SUPABASE_DB_URL')
-    if not db_url:
-        raise ValueError(
-            "SUPABASE_DB_URL not set — copy .env.example to .env and fill in your Supabase credentials"
-        )
-    return psycopg2.connect(db_url)
+    return psycopg2.connect(os.getenv('SUPABASE_DB_URL'))
 
 def store_reading(temperature, humidity):
     """Insert a sensor reading into the readings table. Returns the inserted row."""
