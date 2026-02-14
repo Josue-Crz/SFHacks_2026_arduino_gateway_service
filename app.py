@@ -1,5 +1,6 @@
 from flask import Flask, render_template, url_for, request, jsonify
 from CRUDActions import arduinoJSONHandler, getHandler, postHandler
+from database import store_reading, get_latest_reading
 app = Flask(__name__)
 
 @app.route('/api', methods=['GET', 'POST'])
