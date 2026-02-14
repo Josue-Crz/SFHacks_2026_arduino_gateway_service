@@ -8,11 +8,17 @@ def arduinoJSONHandler():
     # will be the handler of deciding get or post request
 
     # steps of repeated cycle of arduino information
-    # 1) get info from arduino
-    informationCurrent = getHandler() # handle getting the data from arduino hardware
-    # 2) send json data to client server
-    postHandler(informationCurrent) # handle the post request to be sent to user
+    # 1) get info from arduino & format JSON
+    informationCurrent = getHandler() # data type: dictionary
 
+
+    # 2) send json data to DATABASE
+    #postHandler(informationCurrent) # handle the post request to be sent to user
+
+    # final handler of parsed data
+    print(informationCurrent) # purpose: JSON formatted from parse (will need to print terminal first)
+
+    # return type: dictionary
     return informationCurrent # will be: what was scanned from arduino
 
 #handler's purpose: increase modularity and make method calls to keep track of sub processes
@@ -21,7 +27,11 @@ def arduinoJSONHandler():
 # return type: dictionary
 def getHandler():
     # FIXME: this section will use pyserial to grab info from arduino w/ respective getter method
-    return getterSerialPort()
+    return getterSerialPort() # will dive into serialScriptMonitor.py to, return type: dictionary
+
+
+
+
 
 # purpose: make the payload to client ab arduino info
 # argument one is what was returned from getHandler() above
