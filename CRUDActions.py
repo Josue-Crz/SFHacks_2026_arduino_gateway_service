@@ -115,7 +115,7 @@ def postHandler(dataGrabbedArduino):
     # Attempt to send payload
     try:
         # Create payload using your existing handler
-        payload_info = POSTPayLoadHandler(dataGrabbedArduino)
+        payload_info = POSTPayLoadHandler(full_endpoint, dataGrabbedArduino)
         
         if payload_info is None:
             raise ValueError("POSTPayLoadHandler returned None")
