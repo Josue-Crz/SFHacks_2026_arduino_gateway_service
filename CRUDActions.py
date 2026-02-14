@@ -6,6 +6,7 @@ Purpose: Handle GET & POST actions between Arduino hardware and frontend client
 import os
 import requests
 import json
+import psycopg2
 from dotenv import load_dotenv
 from serialScriptMonitor import POSTPayLoadHandler, getterSerialPort
 from database import store_reading
