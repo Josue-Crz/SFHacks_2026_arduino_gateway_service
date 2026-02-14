@@ -22,23 +22,30 @@ def _get_serial():
 
 def getterSerialPort():
     """
-    Read one line from the Arduino serial port.
-    Expects format: "temperature,humidity\\n"
+    Read two lines from the Arduino serial port.
+    Expects format:
+        Temperature=<value>
+        Humidity=<value>
     Returns dict with temperatureF, temperatureC, humidity — or None on failure.
     """
     try:
         ser = _get_serial()
-        raw = ser.readline().decode('utf-8').strip()
-        if not raw:
+        readings = {}
+
+        for _ in range(2):
+            raw = ser.readline().decode('utf-8').strip()
+            if not raw or '=' not in raw:
+                print(f"Warning: unexpected serial format: {raw}")
+                return None
+            key, value = raw.split('=', 1)
+            readings[key.strip()] = float(value.strip())
+
+        if 'Temperature' not in readings or 'Humidity' not in readings:
+            print(f"Warning: missing expected keys, got: {list(readings.keys())}")
             return None
 
-        parts = raw.split(',')
-        if len(parts) < 2:
-            print(f"Warning: unexpected serial format: {raw}")
-            return None
-
-        temp_f = float(parts[0])
-        humidity = float(parts[1])
+        temp_f = readings['Temperature']
+        humidity = readings['Humidity']
         temp_c = (temp_f - 32) * 5.0 / 9.0
 
         return {
