@@ -8,6 +8,7 @@ import requests
 import json
 from dotenv import load_dotenv
 from serialScriptMonitor import POSTPayLoadHandler, getterSerialPort
+from database import store_reading
 
 # Load environment variables
 load_dotenv()
@@ -24,13 +25,23 @@ def arduinoJSONHandler():
     """
     # Step 1: Get info from Arduino
     informationCurrent = getHandler()
-    
-    # Step 2: Send JSON data to client server
+
+    # Step 2: Store reading in Supabase
+    db_result = None
+    if informationCurrent and 'temperatureF' in informationCurrent and 'humidity' in informationCurrent:
+        try:
+            db_result = store_reading(informationCurrent['temperatureF'], informationCurrent['humidity'])
+            print(f"Stored reading in Supabase: {db_result}")
+        except Exception as e:
+            print(f"Error storing reading in Supabase: {e}")
+
+    # Step 3: Send JSON data to client server
     postResult = postHandler(informationCurrent)
-    
+
     # Combine results
     return {
         'arduino_data': informationCurrent,
+        'db_result': db_result,
         'post_status': postResult
     }
 
