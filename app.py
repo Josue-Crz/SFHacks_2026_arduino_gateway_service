@@ -44,4 +44,5 @@ def index():
 if __name__ == "__main__":
     t = threading.Thread(target=serial_reader_loop, daemon=True)
     t.start()
-    app.run(debug=True)
+    print("Background serial reader started")
+    app.run(debug=True, use_reloader=False)
