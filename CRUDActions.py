@@ -1,7 +1,9 @@
 # purpose: handle the CRUD actions
 # to do: GET & POST
-
 from serialScriptMonitor import POSTPayLoadHandler, getterSerialPort # handles how the payload is made
+
+import psycopg2
+from psycopg2.extras import Json
 
 # return type: dictionary
 def arduinoJSONHandler():
@@ -13,7 +15,7 @@ def arduinoJSONHandler():
 
 
     # 2) send json data to DATABASE
-    #postHandler(informationCurrent) # handle the post request to be sent to user
+    dbSendHandler(informationCurrent) # handle the post request to be sent to user
 
     # final handler of parsed data
     print(informationCurrent) # purpose: JSON formatted from parse (will need to print terminal first)
@@ -35,19 +37,32 @@ def getHandler():
 
 # purpose: make the payload to client ab arduino info
 # argument one is what was returned from getHandler() above
-def postHandler(dataGrabbedArduino): # handles the full picture of post request sent to client
-    # datagrabbed from arduino is empty
-    if (dataGrabbedArduino == None):
-        return dict({"Status": "Arduino info lacking"})
+def dbSendHandler(dataGrabbedFromArduino): # handles the full picture of post request sent to client
+    if(dataGrabbedFromArduino == None):
+        return dict({"Empty": "Empty JSON"})
 
-    payLoadInfo = None
-    NGROKURLTOCLIENT = None #FIXME you need to grab FRONTEND SERVER URL from .env but remember to do so securely! dont commit sensitive data
-    clientURL = NGROKURLTOCLIENT # Grab client endpoint to make POST requests to client server about arduino data
+    #CONN_STRING -> .env var
 
-    #now make a try-except for payload
+    # MAJOR TO DO:
+    # sending data of JSON Arduino data in Python -> Postgresql DB
     try:
-        payLoadInfo = POSTPayLoadHandler(clientURL, dataGrabbedArduino)  # returns dict
-    except:
-        print("Couldn't make payload to client", payLoadInfo) # prints out the data of payLoadInfo
+        # init logic credentials
+        conn = psycopg2.connect("dname=test user=postgres password=secret")
+        cur = conn.cursor()
 
-    return payLoadInfo # returns what was sent to client within middle man handling (return type: dictionary)
+        # execution to db
+        cur.execute(
+            "INSERT INTO profiles (settings) VALUES (%s)",
+            (Json(dataGrabbedFromArduino),)
+        )
+
+        conn.commit()
+        print("JSON SENT TO POSTGRESQL")
+
+
+    finally: # close all connection
+        if conn:
+            cur.close()
+            conn.close()
+
+    return dict({"DB Status": "Sent to DB Success"})
