@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 import threading
 import time
 from flask import Flask, jsonify
