@@ -1,23 +1,65 @@
 import serial
+import os
 import time
 
-SerialObj = serial.Serial('/dev/ttyACM0')
-
-# settings of serial ports:
-SerialObj.baudrate = 2000000
-SerialObj.bytesize = 8
-SerialObj.parity = 'N'
-SerialObj.stopbits = 1
-time.sleep(3) # allow the Arduino to boot
-
-# input from user on client
-SerialWriteBuffer = None
+# Lazy-initialized serial connection — no crash at import time
+_serial_obj = None
 
 
-# gets actual information of serial port
+def _get_serial():
+    """Open serial port on first use, using env vars SERIAL_PORT and SERIAL_BAUD."""
+    global _serial_obj
+    if _serial_obj is not None:
+        return _serial_obj
+
+    port = os.getenv('SERIAL_PORT', '/dev/ttyACM0')
+    baud = int(os.getenv('SERIAL_BAUD', '9600'))
+
+    _serial_obj = serial.Serial(port, baudrate=baud, bytesize=8, parity='N', stopbits=1)
+    time.sleep(3)  # allow the Arduino to boot
+    return _serial_obj
+
+
 def getterSerialPort():
-    return dict({"Info from ": " arduino"})
+    """
+    Read one line from the Arduino serial port.
+    Expects format: "temperature,humidity\\n"
+    Returns dict with temperatureF, temperatureC, humidity — or None on failure.
+    """
+    try:
+        ser = _get_serial()
+        raw = ser.readline().decode('utf-8').strip()
+        if not raw:
+            return None
 
-# this will handle the POST request to client after getterSerialPort() method in this file that handled serial py
+        parts = raw.split(',')
+        if len(parts) < 2:
+            print(f"Warning: unexpected serial format: {raw}")
+            return None
+
+        temp_f = float(parts[0])
+        humidity = float(parts[1])
+        temp_c = (temp_f - 32) * 5.0 / 9.0
+
+        return {
+            "temperatureF": round(temp_f, 2),
+            "temperatureC": round(temp_c, 2),
+            "humidity": round(humidity, 2),
+        }
+    except (serial.SerialException, OSError) as e:
+        print(f"Warning: could not open serial port: {e}")
+        return None
+    except (ValueError, IndexError) as e:
+        print(f"Warning: failed to parse serial data: {e}")
+        return None
+
+
 def POSTPayLoadHandler(clientURL, dataGrabbedArduino):
-    pass # fixme: grab Luis's REACT server url and safely put into .env file
+    """Forward Arduino data to a client URL via POST (kept for CRUDActions compatibility)."""
+    import requests
+    try:
+        resp = requests.post(clientURL, json=dataGrabbedArduino, timeout=5)
+        return {"status": resp.status_code, "url": clientURL}
+    except Exception as e:
+        print(f"POSTPayLoadHandler error: {e}")
+        return None
