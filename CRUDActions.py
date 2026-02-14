@@ -24,14 +24,14 @@ def getHandler():
     return getterSerialPort()
 
 # purpose: make the payload to client ab arduino info
-# argument one is what was given from getHandler()
+# argument one is what was returned from getHandler() above
 def postHandler(dataGrabbedArduino): # handles the full picture of post request sent to client
     # datagrabbed from arduino is empty
     if (dataGrabbedArduino == None):
         return dict({"Status": "Arduino info lacking"})
 
     payLoadInfo = None
-    NGROKURLTOCLIENT = None #FIXME you need to grab FRONTEND SERVER URL from .env
+    NGROKURLTOCLIENT = None #FIXME you need to grab FRONTEND SERVER URL from .env but remember to do so securely! dont commit sensitive data
     clientURL = NGROKURLTOCLIENT # Grab client endpoint to make POST requests to client server about arduino data
 
     #now make a try-except for payload
