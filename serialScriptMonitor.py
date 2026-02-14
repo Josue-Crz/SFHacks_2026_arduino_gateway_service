@@ -13,7 +13,7 @@ def _get_serial():
         return _serial_obj
 
     port = os.getenv('SERIAL_PORT', '/dev/ttyACM0')
-    baud = int(os.getenv('SERIAL_BAUD', '9600'))
+    baud = int(os.getenv('SERIAL_BAUD', '2000000'))
 
     _serial_obj = serial.Serial(port, baudrate=baud, bytesize=8, parity='N', stopbits=1)
     time.sleep(3)  # allow the Arduino to boot
@@ -24,7 +24,7 @@ def getterSerialPort():
     """
     Read two lines from the Arduino serial port.
     Expects format:
-        Temperature=<value>
+        T=<value>        (Celsius, from DHT11)
         Humidity=<value>
     Returns dict with temperatureF, temperatureC, humidity — or None on failure.
     """
@@ -40,13 +40,13 @@ def getterSerialPort():
             key, value = raw.split('=', 1)
             readings[key.strip()] = float(value.strip())
 
-        if 'Temperature' not in readings or 'Humidity' not in readings:
+        if 'T' not in readings or 'Humidity' not in readings:
             print(f"Warning: missing expected keys, got: {list(readings.keys())}")
             return None
 
-        temp_f = readings['Temperature']
+        temp_c = readings['T']
         humidity = readings['Humidity']
-        temp_c = (temp_f - 32) * 5.0 / 9.0
+        temp_f = temp_c * 9.0 / 5.0 + 32
 
         return {
             "temperatureF": round(temp_f, 2),
