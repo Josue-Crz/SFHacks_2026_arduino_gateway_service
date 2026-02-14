@@ -13,7 +13,7 @@ def _get_serial():
         return _serial_obj
 
     port = os.getenv('SERIAL_PORT', '/dev/ttyACM0')
-    baud = int(os.getenv('SERIAL_BAUD', '9600'))
+    baud = int(os.getenv('SERIAL_BAUD', '2000000'))
 
     _serial_obj = serial.Serial(port, baudrate=baud, bytesize=8, parity='N', stopbits=1)
     time.sleep(3)  # allow the Arduino to boot
@@ -22,24 +22,31 @@ def _get_serial():
 
 def getterSerialPort():
     """
-    Read one line from the Arduino serial port.
-    Expects format: "temperature,humidity\\n"
+    Read two lines from the Arduino serial port.
+    Expects format:
+        T=<value>        (Celsius, from DHT11)
+        Humidity=<value>
     Returns dict with temperatureF, temperatureC, humidity — or None on failure.
     """
     try:
         ser = _get_serial()
-        raw = ser.readline().decode('utf-8').strip()
-        if not raw:
+        readings = {}
+
+        for _ in range(2):
+            raw = ser.readline().decode('utf-8').strip()
+            if not raw or '=' not in raw:
+                print(f"Warning: unexpected serial format: {raw}")
+                return None
+            key, value = raw.split('=', 1)
+            readings[key.strip()] = float(value.strip())
+
+        if 'T' not in readings or 'Humidity' not in readings:
+            print(f"Warning: missing expected keys, got: {list(readings.keys())}")
             return None
 
-        parts = raw.split(',')
-        if len(parts) < 2:
-            print(f"Warning: unexpected serial format: {raw}")
-            return None
-
-        temp_f = float(parts[0])
-        humidity = float(parts[1])
-        temp_c = (temp_f - 32) * 5.0 / 9.0
+        temp_c = readings['T']
+        humidity = readings['Humidity']
+        temp_f = temp_c * 9.0 / 5.0 + 32
 
         return {
             "temperatureF": round(temp_f, 2),
