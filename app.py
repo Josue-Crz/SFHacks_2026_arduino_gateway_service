@@ -1,27 +1,47 @@
-from flask import Flask, render_template, url_for, request, jsonify
-from CRUDActions import arduinoJSONHandler, getHandler, postHandler
+from dotenv import load_dotenv
+load_dotenv()
+
+import threading
+import time
+from flask import Flask, jsonify
+from CRUDActions import arduinoJSONHandler
+from serialScriptMonitor import getterSerialPort
+from database import store_reading, get_latest_reading
+
 app = Flask(__name__)
+
+
+def serial_reader_loop():
+    """Background thread: read Arduino serial → store in Supabase every 5 seconds."""
+    while True:
+        try:
+            data = getterSerialPort()
+            if data and 'temperatureF' in data and 'humidity' in data:
+                row = store_reading(data['temperatureF'], data['humidity'])
+                print(f"Background: stored reading — {row}")
+            else:
+                print("Background: no valid data from Arduino")
+        except Exception as e:
+            print(f"Background: error — {e}")
+        time.sleep(5)
+
 
 @app.route('/api', methods=['GET', 'POST'])
 def dataHandler():
-    # request json from current data within ngrok
-    # return type of arduinoJSONHandler(): dictionary
-    dataGrabbedArduino = arduinoJSONHandler() # offload dictionary of POST to user here
-
-
-
-
-    # IGNORE WAS A TEST to see if data handler method works
+    dataGrabbedArduino = arduinoJSONHandler()
     dataGrabbedArduino["CALL"] = "SUCCESS TO dataHandler -> arduino information"
+    return dataGrabbedArduino
 
-    # will inform current end pt ab. what was sent to be displayed in flask server
-    return dataGrabbedArduino # return type will be dictionary in order to be JSONIFIED
 
 @app.route('/')
 def index():
-    return jsonify(dataHandler()) # jsonify argument must be dictionary in order to be jsonified
+    latest = get_latest_reading()
+    if latest:
+        return jsonify(latest)
+    return jsonify(dataHandler())
 
 
 if __name__ == "__main__":
+    t = threading.Thread(target=serial_reader_loop, daemon=True)
+    t.start()
     app.run(debug=True)
-
