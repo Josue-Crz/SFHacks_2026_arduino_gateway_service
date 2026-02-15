@@ -47,7 +47,7 @@ def dbSendHandler(dataGrabbedFromArduino): # handles the full picture of post re
     # sending data of JSON Arduino data in Python -> Postgresql DB
     try:
         # init logic credentials
-        conn = psycopg2.connect("dname=test user=postgres password=secret")
+        conn = psycopg2.connect("postgresql://postgres.qvbcplgpukjgsmzrqouq:dKWDI8Tb5GmfzJsN@aws-0-us-west-2.pooler.supabase.com:5432/postgres")
         cur = conn.cursor()
 
         # execution to db
