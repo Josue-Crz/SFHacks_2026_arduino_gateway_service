@@ -13,7 +13,7 @@ def arduinoJSONHandler():
 
 
     # 2) send json data to DATABASE
-    dbSendHandler(informationCurrent) # handle the post request to be sent to user
+    #dbSendHandler(informationCurrent) # handle the post request to be sent to user
 
     # final handler of parsed data
     print(informationCurrent) # purpose: JSON formatted from parse (will need to print terminal first)
@@ -26,7 +26,6 @@ def arduinoJSONHandler():
 # purpose: get current Arduino information in JSON format using pyserial lib.
 # return type: dictionary
 def getHandler():
-    # FIXME: this section will use pyserial to grab info from arduino w/ respective getter method
     return getterSerialPort() # will dive into serialScriptMonitor.py to, return type: dictionary
 
 

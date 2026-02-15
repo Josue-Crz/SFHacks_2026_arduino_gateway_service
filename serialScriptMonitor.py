@@ -26,7 +26,7 @@ def getterSerialPort():
     tempHumidJSON["Humidity"] = float(humid_raw.split('=')[1])
 
 
-
+    print(tempHumidJSON)
     return tempHumidJSON
 
 

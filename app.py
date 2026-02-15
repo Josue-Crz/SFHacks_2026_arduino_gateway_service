@@ -29,6 +29,10 @@ def dataHandler():
     dataGrabbedArduino = arduinoJSONHandler() # data type: dictionary
     dataGrabbedArduino["CALL"] = "SUCCESS END OP OF dataHandler -> arduino information"
 
+
+
+    #store_reading(str(dataGrabbedArduino["Temperature"]), str(dataGrabbedArduino["Humidity"])) # store_reading sends to db
+
     return dataGrabbedArduino
 
 # output of the json IGNORE FOR NOW
