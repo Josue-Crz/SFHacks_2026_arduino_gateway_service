@@ -19,8 +19,11 @@ def getterSerialPort():
     #lineBytes = SerialObj.readline()
     tempHumidJSON = dict()
 
-    tempHumidJSON["Temperature"] = str(SerialObj.readline().decode('utf-8').strip())
-    tempHumidJSON["Humidity"] = str(SerialObj.readline().decode('utf-8').strip())
+    temp_raw = SerialObj.readline().decode('utf-8').strip()   # e.g. "T=20.0"
+    humid_raw = SerialObj.readline().decode('utf-8').strip()  # e.g. "Humidity=53.0"
+
+    tempHumidJSON["Temperature"] = float(temp_raw.split('=')[1])
+    tempHumidJSON["Humidity"] = float(humid_raw.split('=')[1])
 
 
 
