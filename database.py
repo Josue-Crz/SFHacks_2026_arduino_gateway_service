@@ -1,3 +1,7 @@
+# purpose: database.py -> handles interactions with Supabase PostgreSQL data
+# - Still a work in progress  to implement the actual database interaction
+# goal: utilize the database to store readings from the Arduino and retrieve for the client
+
 import os
 from decimal import Decimal
 import psycopg2

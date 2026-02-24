@@ -1,8 +1,9 @@
 // SFHacks 2026 GreenSense Prototype
 // Prototype of GreenSense device using Arduino libraries
 
-// WIP
-// libraries & their purpose
+// Author of Arduino Libraries: Arduino 1.8.19
+// Author of logic: Josue Cruz
+
 
 // DHT11 Library
 #include <dht_nonblocking.h>

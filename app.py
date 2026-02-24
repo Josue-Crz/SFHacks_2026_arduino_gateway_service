@@ -1,3 +1,5 @@
+# app.py -> main file for flask server, also contains background subprocesses of handling pyserial reading
+# alongside the API endpoints to send data to client side.
 from dotenv import load_dotenv
 load_dotenv()
 
